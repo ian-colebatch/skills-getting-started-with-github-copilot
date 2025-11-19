@@ -142,3 +142,54 @@ footer {
   padding: 20px;
   color: #666;
 }
+
+/* Participants section styling */
+.participants {
+  margin-top: 12px;
+}
+
+.participants-title {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  color: #2e3a87;
+  font-weight: 700;
+}
+
+/* make list neat and compact */
+.participant-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* each participant row with a small avatar dot and name */
+.participant-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background-color: #ffffff;
+  border: 1px solid #eef1ff;
+  font-size: 0.95rem;
+  color: #263238;
+}
+
+/* circular dot avatar */
+.participant-item::before {
+  content: "";
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6c8ef5 0%, #3b5fd6 100%);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* subtle hover for each row */
+.participant-item:hover {
+  background-color: #f6f8ff;
+}
