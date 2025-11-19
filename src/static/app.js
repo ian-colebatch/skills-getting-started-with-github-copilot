@@ -27,34 +27,69 @@ document.addEventListener("DOMContentLoaded", () => {
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
         activityCard.className = "activity-card";
+        activityCard.dataset.activity = name;
 
-        const spotsLeft = details.max_participants - details.participants.length;
+        const spotsLeft = details.max_participants - (details.participants ? details.participants.length : 0);
 
-        // Build participants section (bulleted list) or friendly fallback
-        let participantsHTML = "";
+        // Basic info
+        const title = document.createElement("h4");
+        title.textContent = name;
+
+        const desc = document.createElement("p");
+        desc.textContent = details.description;
+
+        const schedule = document.createElement("p");
+        schedule.innerHTML = `<strong>Schedule:</strong> ${escapeHtml(details.schedule)}`;
+
+        const availability = document.createElement("p");
+        availability.innerHTML = `<strong>Availability:</strong> ${spotsLeft} spots left`;
+
+        activityCard.appendChild(title);
+        activityCard.appendChild(desc);
+        activityCard.appendChild(schedule);
+        activityCard.appendChild(availability);
+
+        // Participants section built with DOM so we can add delete buttons
+        const participantsDiv = document.createElement("div");
+        participantsDiv.className = "participants";
+
         if (details.participants && details.participants.length) {
-          participantsHTML = `
-            <div class="participants">
-              <h5 class="participants-title">Participants</h5>
-              <ul class="participant-list">
-                ${details.participants
-                  .map((p) => `<li class="participant-item">${escapeHtml(p)}</li>`)
-                  .join("")}
-              </ul>
-            </div>
-          `;
+          const pTitle = document.createElement("h5");
+          pTitle.className = "participants-title";
+          pTitle.textContent = "Participants";
+
+          const ul = document.createElement("ul");
+          ul.className = "participant-list";
+
+          details.participants.forEach((p) => {
+            const li = document.createElement("li");
+            li.className = "participant-item";
+
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = p;
+
+            const delBtn = document.createElement("button");
+            delBtn.className = "delete-btn";
+            delBtn.type = "button";
+            delBtn.dataset.email = p;
+            delBtn.setAttribute("aria-label", `Unregister ${p}`);
+            delBtn.textContent = "✖";
+
+            li.appendChild(nameSpan);
+            li.appendChild(delBtn);
+            ul.appendChild(li);
+          });
+
+          participantsDiv.appendChild(pTitle);
+          participantsDiv.appendChild(ul);
         } else {
-          participantsHTML = `<p class="info">No participants yet</p>`;
+          const info = document.createElement("p");
+          info.className = "info";
+          info.textContent = "No participants yet";
+          participantsDiv.appendChild(info);
         }
 
-        activityCard.innerHTML = `
-          <h4>${escapeHtml(name)}</h4>
-          <p>${escapeHtml(details.description)}</p>
-          <p><strong>Schedule:</strong> ${escapeHtml(details.schedule)}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
-          ${participantsHTML}
-        `;
-
+        activityCard.appendChild(participantsDiv);
         activitiesList.appendChild(activityCard);
 
         // Add option to select dropdown
@@ -111,4 +146,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize app
   fetchActivities();
+  
+  // Delegate delete participant clicks
+  activitiesList.addEventListener("click", async (event) => {
+    const btn = event.target.closest(".delete-btn");
+    if (!btn) return;
+    
+    const activityCard = btn.closest(".activity-card");
+    if (!activityCard) return;
+    
+    const activityName = activityCard.querySelector("h4").textContent;
+    const email = btn.dataset.email;
+    
+    try {
+      const resp = await fetch(
+        `/activities/${encodeURIComponent(activityName)}/participants?email=${encodeURIComponent(email)}`,
+        { method: "DELETE" }
+      );
+      
+      const result = await resp.json();
+      
+      if (resp.ok) {
+        messageDiv.textContent = result.message;
+        messageDiv.className = "success";
+        messageDiv.classList.remove("hidden");
+        setTimeout(() => messageDiv.classList.add("hidden"), 4000);
+        // Refresh activities to reflect changes
+        fetchActivities();
+      } else {
+        messageDiv.textContent = result.detail || "Failed to remove participant";
+        messageDiv.className = "error";
+        messageDiv.classList.remove("hidden");
+      }
+    } catch (err) {
+      console.error("Error removing participant:", err);
+      messageDiv.textContent = "Failed to remove participant. Please try again.";
+      messageDiv.className = "error";
+      messageDiv.classList.remove("hidden");
+    }
+  });
 });

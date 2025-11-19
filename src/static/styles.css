@@ -193,3 +193,19 @@ footer {
 .participant-item:hover {
   background-color: #f6f8ff;
 }
+
+/* Delete button next to each participant */
+.delete-btn {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #c62828;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.delete-btn:hover {
+  background-color: rgba(198,40,40,0.08);
+}
