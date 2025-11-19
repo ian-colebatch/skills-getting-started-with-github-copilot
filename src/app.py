@@ -21,6 +21,42 @@ app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
 
 # In-memory activity database
 activities = {
+    "Soccer Team": {
+        "description": "Competitive soccer team practicing tactics and teamwork",
+        "schedule": "Mondays and Thursdays, 4:00 PM - 6:00 PM",
+        "max_participants": 22,
+        "participants": ["liam@mergington.edu", "ava@mergington.edu"]
+    },
+    "Basketball Team": {
+        "description": "Indoor basketball practices and inter-school games",
+        "schedule": "Tuesdays and Fridays, 4:00 PM - 6:00 PM",
+        "max_participants": 15,
+        "participants": ["noah@mergington.edu", "isabella@mergington.edu"]
+    },
+    "Art Club": {
+        "description": "Exploring drawing, painting, and mixed media projects",
+        "schedule": "Wednesdays, 3:30 PM - 5:00 PM",
+        "max_participants": 20,
+        "participants": ["mia@mergington.edu", "ethan@mergington.edu"]
+    },
+    "Drama Club": {
+        "description": "Acting, stagecraft, and production workshops culminating in performances",
+        "schedule": "Thursdays, 3:30 PM - 5:30 PM",
+        "max_participants": 25,
+        "participants": ["charlotte@mergington.edu", "oliver@mergington.edu"]
+    },
+    "Debate Team": {
+        "description": "Learn research, public speaking, and competitive debating",
+        "schedule": "Tuesdays, 5:00 PM - 6:30 PM",
+        "max_participants": 18,
+        "participants": ["grace@mergington.edu", "henry@mergington.edu"]
+    },
+    "Science Club": {
+        "description": "Hands-on experiments, guest lectures, and science fairs",
+        "schedule": "Fridays, 3:30 PM - 4:30 PM",
+        "max_participants": 16,
+        "participants": ["isaac@mergington.edu", "luna@mergington.edu"]
+    },
     "Chess Club": {
         "description": "Learn strategies and compete in chess tournaments",
         "schedule": "Fridays, 3:30 PM - 5:00 PM",
@@ -58,6 +94,11 @@ def signup_for_activity(activity_name: str, email: str):
     # Validate activity exists
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
+
+# Validate student is not already signed up
+    if email in activities[activity_name]["participants"]:
+        raise HTTPException(
+            status_code=400, detail="Student already signed up for this activity")     
 
     # Get the specific activity
     activity = activities[activity_name]
